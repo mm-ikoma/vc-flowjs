@@ -4,7 +4,9 @@
         "webmozart/path-util": "^2.3",
         "monolog/monolog": "^1.22",
         "gamegos/jws": "^1.0",
-        "icicleio/icicle": "^0.9.6"
+        "icicleio/icicle": "^0.9.6",
+        "silex/silex": "^2.0",
+        "aws/aws-sdk-php": "^3.22"
     },
     "autoload": {
         "psr-4": {

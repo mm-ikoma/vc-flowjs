@@ -1,15 +1,9 @@
 <?php
 
 require __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/Constants.php';
 
-use Webmozart\PathUtil\Path;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-define('LOG_DIR', Path::join(__DIR__, 'logs'));
-
-$logger = new Logger('async');
-$logger->pushHandler(new StreamHandler(Path::join(LOG_DIR, 'jws.log'), Logger::DEBUG));
+$logger = \Macromill\CORe\VC\LoggerFactory::create('jws');
 
 $headers = [
     'alg' => 'HS256', //alg is required. see *Algorithms* section for supported algorithms
@@ -31,7 +25,7 @@ $jwsString = $jws->encode($headers, $payload, $key);
 
 try {
     $decoded = $jws->verify($jwsString, $key);
-    print_r($decoded);
+    $logger->info($decoded);
 } catch (\Gamegos\JWS\Exception\InvalidSignatureException $e) {
-    echo "InvalidSignature\n";
+    $logger->error("InvalidSignature\n");
 }

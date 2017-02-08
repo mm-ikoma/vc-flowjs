@@ -91,25 +91,25 @@ var IndexView = Backbone.View.extend({
             var evtSource = new EventSource("/playground/vc-flowjs/www/sse.php?flowIdentifier=" + fileId + "&flowFilename=" + fileName);
 
             evtSource.addEventListener("message", function(e) {
-                console.log("message", arguments);
+                Logger.info("EventSource.message", arguments);
             }, false);
 
             evtSource.addEventListener("ping", function(e) {
-                console.log("ping", arguments);
+                Logger.info("EventSource.ping", arguments);
             }, false);
 
             evtSource.addEventListener("done", function(e) {
-                console.log("done", arguments);
+                Logger.info("EventSource.done", arguments);
                 evtSource.close();
             }, false);
 
             evtSource.addEventListener("fail", function(e) {
-                console.log("fail", arguments);
+                Logger.error("EventSource.fail", arguments);
                 evtSource.close();
             }, false);
 
             evtSource.addEventListener("error", function(e) {
-                console.error("error", arguments);
+                Logger.error("EventSource.error", arguments);
                 evtSource.close();
             }, false);
 

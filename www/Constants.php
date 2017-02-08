@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
-
 use Webmozart\PathUtil\Path;
 
 define('TMP_DIR', Path::join(__DIR__, 'temp'));

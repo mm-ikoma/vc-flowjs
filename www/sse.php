@@ -4,10 +4,6 @@ require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/Constants.php';
 
 use Webmozart\PathUtil\Path;
-use Monolog\Logger;
-use Monolog\ErrorHandler;
-use Monolog\Handler\StreamHandler;
-
 use Icicle\Awaitable\Promise;
 use Icicle\Loop;
 use Macromill\CORe\VC\SSEUtil;
@@ -15,9 +11,7 @@ use Macromill\CORe\VC\SSEUtil;
 // --------------------
 // Logs
 // --------------------
-$logger = new Logger('sse');
-$logger->pushHandler(new StreamHandler(Path::join(LOG_DIR, 'sse.log'), Logger::DEBUG));
-ErrorHandler::register($logger);
+$logger = \Macromill\CORe\VC\LoggerFactory::create('sse');
 
 // --------------------
 // Params
@@ -40,9 +34,10 @@ Loop\periodic(1, function () use($logger) {
     // ping
     SSEUtil::flush(['time' => microtime(true)], 'ping');
 });
-$promise = new Promise(function (callable $resolve, callable $reject) use($params) {
+$promise = new Promise(function (callable $resolve, callable $reject) use($params, $logger) {
     // 結合処理
     $fileId = $params['fileIdentifier'];
+    $logger->info("start:{$fileId}");
     $wholePath = Path::join($params['TMP_DIR'], "{$fileId}_whole");
     if (!file_exists($wholePath)) {
         $reject(new Exception("$fileId is invalid."));
@@ -58,12 +53,12 @@ $promise = new Promise(function (callable $resolve, callable $reject) use($param
 $promise->done(
     function ($data) use($logger){
         // resolve
-        $logger->info("done:{$data}");
+        $logger->info(" done:{$data}");
         SSEUtil::flush(['data' => $data], 'done');
     },
     function (\Exception $ex) use($logger){
         // reject
-        $logger->error("fail:{$ex->getMessgae()}:{$ex->getTraceAsString()}");
+        $logger->error(" fail:{$ex->getMessgae()}:{$ex->getTraceAsString()}");
         SSEUtil::flush(['data' => $ex->getMessage()], 'fail');
     }
 );

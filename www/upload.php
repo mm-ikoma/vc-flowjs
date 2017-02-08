@@ -4,16 +4,13 @@ require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/Constants.php';
 
 use Webmozart\PathUtil\Path;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
 header('Access-Control-Allow-Origin: *');
 
-// Logger
-$logPath = Path::join(LOG_DIR, 'vc-flowjs.log');
-$logger = new Logger('vc-flowjs');
-$logger->pushHandler(new StreamHandler($logPath, Logger::DEBUG));
-\Monolog\ErrorHandler::register($logger);
+// --------------------
+// Logs
+// --------------------
+$logger = \Macromill\CORe\VC\LoggerFactory::create('vc-flowjs');
 
 $config = new \Flow\Config([
     'tempDir' => TMP_DIR,
@@ -31,6 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'error' => $file['error'],
         'currentChunkSize' => $request->getCurrentChunkSize()
     ];
+    if ($request->getCurrentChunkNumber() == 1) {
+        $logger->info("Start uploading. {$flowFile->getIdentifier()}");
+    }
     $logger->debug(json_encode($contents));
 }
 
@@ -49,7 +49,7 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
 
         $badRequest = function($message) use($logger){
             // error, invalid chunk upload request, retry
-            $logger->debug($message);
+            $logger->error($message);
             header("HTTP/1.1 400 Bad Request");
             return false;
         };
@@ -57,7 +57,8 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
         $chunkId = "{$request->getIdentifier()}-{$request->getCurrentChunkNumber()}";
 
         if (!$flowFile->validateChunk()) {
-            return $badRequest("Invalid chunk. id={$chunkId}");
+            $file = $request->getFile();
+            return $badRequest("Invalid chunk. id={$chunkId} tmp_name={$file['tmp_name']} size={$file['size']} error={$file['error']}");
         }
 
         $chunkPath = $flowFile->getChunkPath($request->getCurrentChunkNumber());
@@ -96,5 +97,5 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
 };
 
 if ($save($destination, $config, $request)) {
-    $logger->debug("File was saved in {$destination}");
+    $logger->info("File was saved in {$destination}");
 }
