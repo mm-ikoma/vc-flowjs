@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+
+function log(level, name, payload){
+    $.ajax({
+        url: "log.php",
+        contentType: "application/json; charset=utf-8",
+        type: "POST",
+        data: JSON.stringify({
+            level: level,
+            name: name,
+            payload: payload,
+        }),
+    }).fail(function(){
+        console.error(arguments);
+    });
+}
+
+$(function(){
+    log(100, "test", "XXX");
+});
+
+</script>

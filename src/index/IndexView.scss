@@ -1,0 +1,63 @@
+@import "../variables";
+@import "../mixins";
+@import "../common";
+
+.root{
+    width:40rem;
+    margin:0 auto;
+    display: flex;
+    @media screen and (max-width: 760px) {
+        width:100%;
+    }
+    flex-direction: column;
+    align-items: center;
+    padding:1rem;
+    .controls{
+        width:100%;
+        display: flex;
+        align-items: center;
+        @media screen and (max-width: 760px) {
+            flex-direction: column;
+            align-items: initial;
+        }
+        padding:.5rem;
+        border:1px solid #eee;
+        .file{
+            flex-grow: 1;
+            padding:.5rem 0;
+        }
+        .btn{
+            padding:.5rem;
+            margin-left:1rem;
+            @media screen and (max-width: 760px) {
+                margin-left:0;
+            }
+            &:not([disabled]){
+            }
+            &[disabled]{
+                opacity: .5;
+            }
+        }
+    }
+    .progress{
+        color:#fff;
+        height: 2rem;
+        align-self: flex-start;
+        transition-duration: .2s;
+        background-color:dodgerblue;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &.complete{
+            background-color:darken(dodgerblue, 15%);
+        }
+    }
+    .player{
+        width:100%;
+        border:1px solid #eee;
+        .video{
+            width:100%;
+            height:20rem;
+        }
+    }
+}

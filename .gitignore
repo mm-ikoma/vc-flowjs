@@ -1,0 +1,9 @@
+asset/
+node_modules/
+vendor/
+
+www/logs/*
+www/temp/*
+www/dest/*
+
+!.gitkeep
