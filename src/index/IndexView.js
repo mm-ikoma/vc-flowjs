@@ -48,7 +48,7 @@ var IndexView = Backbone.View.extend({
 
         this.$flow = new Flow({
             target: '/playground/vc-flowjs/www/upload.php',
-            chunkSize: 1024 * 1024 * 2, // 2MB
+            chunkSize: 5 * 1024 * 1024, // 5MB
             forceChunkSize: true, // Force all chunks to be less or equal than chunkSize.
             maxChunkRetries: 5,
             chunkRetryInterval: 5000,
@@ -87,8 +87,9 @@ var IndexView = Backbone.View.extend({
             var file = this.files[0];
             var fileId = encodeURIComponent(file.uniqueIdentifier);
             var fileName = encodeURIComponent(file.name);
+            var totalChunks = file.chunks.length;
 
-            var evtSource = new EventSource("/playground/vc-flowjs/www/sse.php?flowIdentifier=" + fileId + "&flowFilename=" + fileName);
+            var evtSource = new EventSource("/playground/vc-flowjs/www/sse.php?flowIdentifier=" + fileId + "&flowFilename=" + fileName + "&flowTotalChunks=" + totalChunks);
 
             evtSource.addEventListener("message", function(e) {
                 Logger.info("EventSource.message", arguments);

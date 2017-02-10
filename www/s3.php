@@ -13,31 +13,26 @@ $logger = \Macromill\CORe\VC\LoggerFactory::create('s3');
 // --------------------
 // S3
 // --------------------
-use Aws\S3\MultipartUploader;
-use Aws\Exception\MultipartUploadException;
 
-$s3Client = new Aws\S3\S3Client([
-    'profile'  => 'default',
-    'version'  => 'latest',
-    'region'   => 'ap-northeast-1',
-]);
-
-$bucket = 'test-custom';
-$key = 'vctest';
 $srcFile = Path::join(DST_DIR, '15GB.data');
 
-$logger->info("put-start:{$srcFile}");
+$s3Client = new Aws\S3\S3Client([
+    'profile'  => S3_PROFILE,
+    'version'  => S3_VERSION,
+    'region'   => S3_REGION,
+]);
 
-$uploader = new MultipartUploader($s3Client, $srcFile, [
-    'bucket' => $bucket,
-    'key'    => $key,
+$uploader = new Aws\S3\MultipartUploader($s3Client, $srcFile, [
+    'bucket' => S3_BUCKET,
+    'key'    => 'vctest',
 ]);
 
 try {
+    $logger->info("upload-start:{$srcFile}");
     $result = $uploader->upload();
-    $logger->info("put-done:{$srcFile}");
-} catch (MultipartUploadException $e) {
-    $logger->error("put-fail:{$e->getMessage()}");
+    $logger->info("upload-done:{$srcFile}");
+} catch (Aws\Exception\MultipartUploadException $e) {
+    $logger->error("upload-fail:{$e->getMessage()}");
 }
 
 
