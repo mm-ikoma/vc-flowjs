@@ -28,9 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'error' => $file['error'],
         'currentChunkSize' => $request->getCurrentChunkSize()
     ];
-    if ($request->getCurrentChunkNumber() == 1) {
-        $logger->info("Start uploading. {$flowFile->getIdentifier()}");
-    }
     $logger->debug(json_encode($contents));
 }
 
@@ -82,13 +79,17 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
             return $badRequest("Unmatch finger print. id={$chunkId}, param={$paramFingerPrint} file={$fileFingerPrint}");
         }
 
+        if ($request->getCurrentChunkNumber() == 1) {
+            $logger->info("Start uploading. {$flowFile->getIdentifier()}");
+        }
+
     }
 
     if ($flowFile->validateFile()) {
         $serialized = serialize($flowFile);
         $wholePath = Path::join(TMP_DIR, "{$flowFile->getIdentifier()}_whole");
         if(file_put_contents($wholePath, $serialized) === false){
-            return $badRequest("Whole file write error.");
+            return $badRequest("Whole file write error. {$flowFile->getIdentifier()}");
         }
         return true;
     }

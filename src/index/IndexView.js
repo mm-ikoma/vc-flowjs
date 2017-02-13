@@ -50,7 +50,7 @@ var IndexView = Backbone.View.extend({
             target: '/playground/vc-flowjs/www/upload.php',
             chunkSize: 5 * 1024 * 1024, // 5MB
             forceChunkSize: true, // Force all chunks to be less or equal than chunkSize.
-            maxChunkRetries: 5,
+            maxChunkRetries: 10,
             chunkRetryInterval: 5000,
             generateUniqueIdentifier: function(file) {
                 // Some confusion in different versions of Firefox

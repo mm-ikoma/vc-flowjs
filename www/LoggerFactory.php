@@ -12,7 +12,6 @@ use Monolog\Formatter\LineFormatter;
 
 class LoggerFactory{
 
-
     public static function create($name){
 
         static $utc = null;
