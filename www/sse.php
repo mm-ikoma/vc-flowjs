@@ -19,7 +19,7 @@ $totalChunks = $request->getTotalChunks();
 
 // 子プロセス
 $childProc = new React\ChildProcess\Process("php sse-child.php -i {$fileId} -n {$fileName} -c {$totalChunks}", getcwd(), $_SERVER);
-$childProc->on('exit', function($exitCode, $termSignal) {
+$childProc->on('exit', function ($exitCode, $termSignal) {
     if ($exitCode === 0) {
         SSEUtil::flush(['code' => $exitCode], 'done');
     } else {
@@ -28,15 +28,15 @@ $childProc->on('exit', function($exitCode, $termSignal) {
 });
 
 // 子プロセスの起動
-$loop->addTimer(0.1, function($timer) use ($childProc) {
+$loop->addTimer(0.1, function ($timer) use ($childProc) {
     $childProc->start($timer->getLoop());
-    $childProc->stdout->on('data', function($output) {
+    $childProc->stdout->on('data', function ($output) {
         SSEUtil::flush(['result' => $output], 'stdout');
     });
 });
 
 // ループの繰り返しタスク
-$loop->addPeriodicTimer(5, function($timer) {
+$loop->addPeriodicTimer(5, function ($timer) {
     SSEUtil::flush(['time' => microtime(true)], 'ping');
 });
 

@@ -2,9 +2,10 @@
 
 namespace Macromill\CORe\VC;
 
-class SSEUtil {
-
-    public static function flush(array $data, $event = ''){
+class SSEUtil
+{
+    public static function flush(array $data, $event = '')
+    {
         static $counter = 0;
         $event = trim($event);
         $encoded = trim(json_encode($data));
@@ -18,5 +19,4 @@ class SSEUtil {
         ob_end_flush();
         flush();
     }
-
 }

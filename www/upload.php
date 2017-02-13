@@ -26,28 +26,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'tmp_name' => $file['tmp_name'],
         'size' => $file['size'],
         'error' => $file['error'],
-        'currentChunkSize' => $request->getCurrentChunkSize()
+        'currentChunkSize' => $request->getCurrentChunkSize(),
     ];
     $logger->debug(json_encode($contents));
 }
 
-$save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInterface $request = null) use($logger)
-{
+$save = function ($destination, \Flow\ConfigInterface $config, \Flow\RequestInterface $request = null) use ($logger) {
     $flowFile = new \Flow\File($config, $request);
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if ($flowFile->checkChunk()) {
-            header("HTTP/1.1 200 Ok");
+            header('HTTP/1.1 200 Ok');
         } else {
             // The 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields.
-            header("HTTP/1.1 204 No Content");
+            header('HTTP/1.1 204 No Content');
+
             return false;
         }
     } else {
-
-        $badRequest = function($message) use($logger){
+        $badRequest = function ($message) use ($logger) {
             // error, invalid chunk upload request, retry
             $logger->error($message);
-            header("HTTP/1.1 400 Bad Request");
+            header('HTTP/1.1 400 Bad Request');
+
             return false;
         };
 
@@ -55,6 +55,7 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
 
         if (!$flowFile->validateChunk()) {
             $file = $request->getFile();
+
             return $badRequest("Invalid chunk. id={$chunkId} tmp_name={$file['tmp_name']} size={$file['size']} error={$file['error']}");
         }
 
@@ -69,7 +70,7 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
         }
 
         // Validate finger print.
-        $chunkHandle = fopen($chunkPath, "rb");
+        $chunkHandle = fopen($chunkPath, 'rb');
         $realChunkSize = filesize($chunkPath);
         fseek($chunkHandle, $realChunkSize - 32);
         $chunkContents = fread($chunkHandle, 32);
@@ -82,15 +83,15 @@ $save = function($destination, \Flow\ConfigInterface $config, \Flow\RequestInter
         if ($request->getCurrentChunkNumber() == 1) {
             $logger->info("Start uploading. {$flowFile->getIdentifier()}");
         }
-
     }
 
     if ($flowFile->validateFile()) {
         $serialized = serialize($flowFile);
         $wholePath = Path::join(TMP_DIR, "{$flowFile->getIdentifier()}_whole");
-        if(file_put_contents($wholePath, $serialized) === false){
+        if (file_put_contents($wholePath, $serialized) === false) {
             return $badRequest("Whole file write error. {$flowFile->getIdentifier()}");
         }
+
         return true;
     }
 

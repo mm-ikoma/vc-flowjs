@@ -4,10 +4,9 @@ require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/Constants.php';
 
 use Webmozart\PathUtil\Path;
-use Macromill\CORe\VC\SSEUtil;
 
 $logger = \Macromill\CORe\VC\LoggerFactory::create('sse-child');
-$handleError = function($message) use($logger){
+$handleError = function ($message) use ($logger) {
     $logger->error($message);
     die(1);
 };
@@ -35,58 +34,57 @@ $serialized = file_get_contents($wholePath);
 $flowFile = unserialize($serialized);
 
 if ($flowFile->validateFile()) {
-
     // 1. Instantiate the client.
     $s3Client = new Aws\S3\S3Client([
         // 'profile'  => S3_PROFILE,
         // 'credentials' => Aws\Credentials\CredentialProvider::ini('default', '/home/ec2-user/.aws/credentials'),
         'credentials' => Aws\Credentials\CredentialProvider::env(),
-        'version'  => S3_VERSION,
-        'region'   => S3_REGION,
+        'version' => S3_VERSION,
+        'region' => S3_REGION,
     ]);
 
     // 2. Create a new multipart upload and get the upload ID.
     $key = $opts['n'];
     $response = $s3Client->createMultipartUpload([
         'Bucket' => S3_BUCKET,
-        'Key'    => $key,
+        'Key' => $key,
     ]);
 
     $parts = [];
     $logger->info("{$fileId} chunks={$opts['c']}");
-    for ($i = 1; $i <= $opts['c']; $i++) {
+    for ($i = 1; $i <= $opts['c']; ++$i) {
         $chunkPath = $flowFile->getChunkPath($i);
-        $chunk = fopen($chunkPath, "rb");
+        $chunk = fopen($chunkPath, 'rb');
         if (!$chunk) {
             $handleError("failed to open chunk: {$chunkPath}");
         }
         // 3. Upload the file in parts.
         $result = $s3Client->uploadPart([
-            'Bucket'     => S3_BUCKET,
-            'Key'        => $key,
-            'UploadId'   => $response['UploadId'],
+            'Bucket' => S3_BUCKET,
+            'Key' => $key,
+            'UploadId' => $response['UploadId'],
             'PartNumber' => $i,
-            'Body'       => $chunk,
+            'Body' => $chunk,
         ]);
         $parts[] = [
             'PartNumber' => $i,
-            'ETag'       => $result['ETag'],
+            'ETag' => $result['ETag'],
         ];
         fclose($chunk);
     }
 
     // 4. Complete multipart upload.
     $result = $s3Client->completeMultipartUpload([
-        'Bucket'   => S3_BUCKET,
-        'Key'      => $key,
+        'Bucket' => S3_BUCKET,
+        'Key' => $key,
         'UploadId' => $response['UploadId'],
         'MultipartUpload' => [
-            'Parts' => $parts
+            'Parts' => $parts,
         ],
     ]);
 
-    $flowFileArray = (array)$flowFile;
-    while($e = array_shift($flowFileArray)){
+    $flowFileArray = (array) $flowFile;
+    while ($e = array_shift($flowFileArray)) {
         if ($e instanceof Flow\Config) {
             if ($e->getDeleteChunksOnSave()) {
                 $flowFile->deleteChunks();
@@ -94,12 +92,11 @@ if ($flowFile->validateFile()) {
         }
     }
 
-    if(unlink($wholePath)){
+    if (unlink($wholePath)) {
         $logger->warn("Cannot unlink. Please delete {$wholePath}");
     }
 
     $logger->info("end:{$fileId} URL:{$result['Location']}");
-
 } else {
     $handleError("$fileId is invalid.");
 }

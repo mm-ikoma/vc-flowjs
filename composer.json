@@ -12,5 +12,8 @@
         "psr-4": {
             "Macromill\\CORe\\VC\\": "www/"
          }
-     }
+     },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.1"
+    }
 }

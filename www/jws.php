@@ -7,13 +7,13 @@ $logger = \Macromill\CORe\VC\LoggerFactory::create('jws');
 
 $headers = [
     'alg' => 'HS256', //alg is required. see *Algorithms* section for supported algorithms
-    'typ' => 'JWT'
+    'typ' => 'JWT',
 ];
 
 // anything that json serializable
 $payload = [
     'mid' => '900000',
-    'cid' => '1'
+    'cid' => '1',
 ];
 
 $key = 'some-secret-for-hmac';

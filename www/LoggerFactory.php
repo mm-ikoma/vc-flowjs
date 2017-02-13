@@ -10,10 +10,10 @@ use Monolog\ErrorHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
 
-class LoggerFactory{
-
-    public static function create($name){
-
+class LoggerFactory
+{
+    public static function create($name)
+    {
         static $utc = null;
         if ($utc === null) {
             $utc = new \DateTimeZone('UTC');
@@ -24,14 +24,13 @@ class LoggerFactory{
         $handler = new StreamHandler(Path::join(LOG_DIR, "{$name}.log"), Logger::INFO);
         $handler->setFormatter($formatter);
         $logger->pushHandler($handler);
-        $logger->pushProcessor(function ($record) use($utc){
+        $logger->pushProcessor(function ($record) use ($utc) {
             $record['datetime']->setTimezone($utc);
+
             return $record;
         });
         ErrorHandler::register($logger);
 
         return $logger;
-
     }
-
 }
